@@ -1,7 +1,5 @@
 package hello.batch.job.distributestep;
 
-import hello.batch.job.client.PointClient;
-import hello.batch.job.client.PointClientImpl;
 import hello.batch.model.Reward;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
@@ -13,11 +11,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class DistributeRewardWriter implements ItemWriter<Reward> {
 
     private final JdbcTemplate jdbcTemplate;
-    private final PointClient pointClient;
 
-    public DistributeRewardWriter(JdbcTemplate jdbcTemplate, PointClient pointClient) {
+    public DistributeRewardWriter(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.pointClient = pointClient;
     }
 
     @Override
@@ -29,10 +25,15 @@ public class DistributeRewardWriter implements ItemWriter<Reward> {
     }
 
     private void distributeReward(Reward reward) {
-        reward.getUserRewards().forEach(pointClient::addPoint);
+        reward.getUserRewards().forEach(this::addPoint);
     }
 
     private void clearTempTable(Long challengeId) {
-        jdbcTemplate.update("DELETE FROM tmp_finished_challenge");
+        jdbcTemplate.update("DELETE FROM tmp_finished_challenge WHERE challenge_id = ?", challengeId);
+    }
+
+    public void addPoint(Long userId, int point) {
+        String sql = "UPDATE point_wallet SET balance = balance + ? WHERE id = ?";
+        jdbcTemplate.update(sql, point, userId);
     }
 }

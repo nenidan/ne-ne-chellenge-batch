@@ -1,7 +1,5 @@
 package hello.batch.job.distributestep;
 
-import hello.batch.job.client.PointClient;
-import hello.batch.job.client.TestPointClient;
 import hello.batch.model.Reward;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,13 +7,9 @@ import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,15 +23,7 @@ class DistributeRewardWriterTest {
     JdbcTemplate jdbcTemplate;
 
     @Autowired
-    PointClient testPointClient;
-
-    @Autowired
     ItemWriter<Reward> writer;
-
-    @Test
-    void testPointClientInjected() {
-        assertThat(testPointClient).isInstanceOf(TestPointClient.class);
-    }
 
     @BeforeEach
     void setUp() {
@@ -73,14 +59,5 @@ class DistributeRewardWriterTest {
 
         Integer tempTableRow = jdbcTemplate.queryForObject("select count(*) from tmp_finished_challenge", Integer.class);
         assertThat(tempTableRow).isEqualTo(0);
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        @Primary
-         PointClient pointClient(JdbcTemplate jdbcTemplate) {
-            return new TestPointClient(jdbcTemplate);
-        }
     }
 }

@@ -1,6 +1,5 @@
 package hello.batch.job.distributestep;
 
-import hello.batch.job.client.PointClient;
 import hello.batch.model.ChallengeResult;
 import hello.batch.model.Reward;
 import org.springframework.batch.core.Step;
@@ -78,7 +77,7 @@ public class DistributeStepConfig {
     }
 
     @Bean
-    public ItemWriter<Reward> distributeRewardWriter(JdbcTemplate jdbcTemplate, PointClient pointClient) {
-        return new DistributeRewardWriter(jdbcTemplate, pointClient);
+    public ItemWriter<Reward> distributeRewardWriter(JdbcTemplate jdbcTemplate) {
+        return new DistributeRewardWriter(jdbcTemplate);
     }
 }
