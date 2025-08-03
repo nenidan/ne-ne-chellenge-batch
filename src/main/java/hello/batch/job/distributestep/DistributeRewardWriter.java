@@ -33,7 +33,7 @@ public class DistributeRewardWriter implements ItemWriter<Reward> {
     }
 
     public void addPoint(Long userId, int point) {
-        String sql = "UPDATE point_wallet SET balance = balance + ? WHERE id = ?";
+        String sql = "UPDATE point_wallet SET balance = balance + ? WHERE user_id = ?";
         jdbcTemplate.update(sql, point, userId);
     }
 }

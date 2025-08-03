@@ -23,7 +23,7 @@ import javax.sql.DataSource;
 public class DistributeStepConfig {
 
     @Bean
-    public Step distributeChallengeStep(JobRepository jobRepository,
+    public Step distributeRewardStep(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
         ItemReader<ChallengeResult> challengeResultReader,
         ItemProcessor<ChallengeResult, Reward> calculateRewardProcessor,
