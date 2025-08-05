@@ -47,17 +47,30 @@ class DistributeRewardWriterTest {
     void write() throws Exception {
         // given
         Map<Long, Integer> userReward = Map.of(99L, 20000);
-        List<Reward> rewards = List.of(new Reward(99L, userReward));
+        Map<Long, Long> userPointWallet = Map.of(99L, 99L);
+        List<Reward> rewards = List.of(new Reward(99L, userReward, userPointWallet));
         Chunk<Reward> chunk = new Chunk<>(rewards);
 
         // when
         writer.write(chunk);
 
         // then
-        Integer point = jdbcTemplate.queryForObject("SELECT balance FROM point_wallet WHERE user_id = ?", Integer.class, 99L);
+        Integer point = jdbcTemplate.queryForObject("SELECT balance FROM point_wallet WHERE user_id = ?",
+            Integer.class,
+            99L
+        );
         assertThat(point).isEqualTo(20000);
 
-        Integer tempTableRow = jdbcTemplate.queryForObject("select count(*) from tmp_finished_challenge", Integer.class);
+        Integer tempTableRow = jdbcTemplate.queryForObject("select count(*) from tmp_finished_challenge",
+            Integer.class
+        );
         assertThat(tempTableRow).isEqualTo(0);
+
+        Integer transactionCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM point_transaction WHERE point_wallet_id = ?",
+            Integer.class,
+            99
+        );
+        assertThat(transactionCount).isEqualTo(1);
     }
 }

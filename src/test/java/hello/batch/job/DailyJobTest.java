@@ -34,6 +34,7 @@ class DailyJobTest {
     @BeforeEach
     void setUp() {
         jobRepositoryTestUtils.removeJobExecutions();
+        clearTestData();
         insertChallenges();
         insertPointWallet();
         insertHistory();
@@ -41,6 +42,7 @@ class DailyJobTest {
 
     @AfterEach
     void clearTestData() {
+        jdbcTemplate.update("DELETE FROM point_transaction WHERE point_wallet_id = 99");
         jdbcTemplate.update("DELETE FROM point_wallet WHERE user_id IN (99, 100, 101)");
         jdbcTemplate.update("DELETE FROM history WHERE user_id IN (99, 100, 101)");
         jdbcTemplate.update("DELETE FROM challenge WHERE id IN (99, 100, 101)");
@@ -79,6 +81,13 @@ class DailyJobTest {
         assertThat(user100Point).isEqualTo(0);
         assertThat(user101Point).isEqualTo(3000);
 
+        Integer transactionCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM point_transaction WHERE point_wallet_id = ?",
+            Integer.class,
+            99
+        );
+        assertThat(transactionCount).isEqualTo(1);
+
         Integer tempTableRow = jdbcTemplate.queryForObject("SELECT count(*) FROM tmp_finished_challenge",
             Integer.class
         );
@@ -107,10 +116,10 @@ class DailyJobTest {
      */
     private void insertPointWallet() {
         jdbcTemplate.update(
-            "INSERT INTO point_wallet (balance, user_id, created_at) " +
-                "VALUES (0, 99, '2025-01-01')," +
-                "(0, 100, '2025-01-01')," +
-                "(3000, 101, '2025-01-01')");
+            "INSERT INTO point_wallet (id, balance, user_id, created_at) " +
+                "VALUES (99, 0, 99, '2025-01-01')," +
+                "(100, 0, 100, '2025-01-01')," +
+                "(101, 3000, 101, '2025-01-01')");
     }
 
     /**
