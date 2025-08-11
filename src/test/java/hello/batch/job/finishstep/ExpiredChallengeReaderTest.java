@@ -37,17 +37,17 @@ public class ExpiredChallengeReaderTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate.update(
-            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at) " +
-                "VALUES (99, 'ONGOING', 1000, 1000, '2025-07-01', '2025-08-01', 2, 5, '2025-07-01')");
+            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at, current_participant_count) " +
+                "VALUES (99, 'ONGOING', 1000, 1000, '2025-07-01', '2025-08-01', 2, 5, '2025-07-01', 1)");
         jdbcTemplate.update(
-            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at) " +
-                "VALUES (100, 'ONGOING', 2000, 2000, '2025-07-01', '2025-08-01', 2, 5, '2025-07-01')");
+            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at, current_participant_count) " +
+                "VALUES (100, 'ONGOING', 2000, 2000, '2025-07-01', '2025-08-01', 2, 5, '2025-07-01', 1)");
         jdbcTemplate.update(
-            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at) " +
-                "VALUES (101, 'ONGOING', 3000, 3000, '2025-07-01', '2025-07-30', 2, 5, '2025-07-01')");
+            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at, current_participant_count) " +
+                "VALUES (101, 'ONGOING', 3000, 3000, '2025-07-01', '2025-07-30', 2, 5, '2025-07-01', 1)");
         jdbcTemplate.update(
-            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at) " +
-                "VALUES (102, 'FINISHED',4000, 4000, '2025-07-01', '2025-08-01', 2, 5, '2025-07-01')");
+            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at, current_participant_count) " +
+                "VALUES (102, 'FINISHED',4000, 4000, '2025-07-01', '2025-08-01', 2, 5, '2025-07-01', 1)");
     }
 
     public StepExecution getStepExection() {

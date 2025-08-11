@@ -29,8 +29,8 @@ class DistributeRewardWriterTest {
     void setUp() {
         // 99번 챌린지 주입 (history FK)
         jdbcTemplate.update(
-            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at) " +
-                "VALUES (99, 'ONGOING', 20000, 20000, '2025-07-01', '2025-08-01', 2, 5, '2025-07-01')");
+            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at, current_participant_count) " +
+                "VALUES (99, 'ONGOING', 20000, 20000, '2025-07-01', '2025-08-01', 2, 5, '2025-07-01', 1)");
 
         // 99번 유저 포인트 지갑 주입
         jdbcTemplate.update(

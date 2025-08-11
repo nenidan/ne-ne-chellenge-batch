@@ -102,10 +102,10 @@ class DailyJobTest {
      */
     private void insertChallenges() {
         jdbcTemplate.update(
-            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at) " +
-                "VALUES (99, 'ONGOING', 1000, 1000, '2025-07-31', '2025-08-01', 2, 5, '2025-07-01')," +
-                "(100, 'ONGOING', 2000, 2000, '2025-08-01', '2025-08-31', 2, 5, '2025-07-01')," +
-                "(101, 'FINISHED', 3000, 3000, '2025-07-29', '2025-07-30', 2, 5, '2025-07-01')");
+            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at, current_participant_count) " +
+                "VALUES (99, 'ONGOING', 1000, 1000, '2025-07-31', '2025-08-01', 2, 5, '2025-07-01', 1)," +
+                "(100, 'ONGOING', 2000, 2000, '2025-08-01', '2025-08-31', 2, 5, '2025-07-01', 1)," +
+                "(101, 'FINISHED', 3000, 3000, '2025-07-29', '2025-07-30', 2, 5, '2025-07-01', 1)");
     }
 
     /**

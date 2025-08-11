@@ -30,8 +30,8 @@ class CalculateRewardProcessorTest {
     void setUp() {
         // 챌린지 주입 (history FK)
         jdbcTemplate.update(
-            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at) " +
-                "VALUES (99, 'ONGOING', 10000, 10000, '2025-07-01', '2025-08-01', 2, 5, '2025-07-01')");
+            "INSERT INTO challenge (id, status, participation_fee, total_fee, start_at, due_at, max_participants, min_participants, created_at, current_participant_count) " +
+                "VALUES (99, 'ONGOING', 10000, 10000, '2025-07-01', '2025-08-01', 2, 5, '2025-07-01', 1)");
 
         // 99번 사용자 이틀치 인증 기록 주입
         jdbcTemplate.update(
