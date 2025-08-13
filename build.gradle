@@ -29,6 +29,17 @@ dependencies {
 
 }
 
+// 성능 측정을 위한 JMX 설정
+test {
+	jvmArgs = [
+			"-Dcom.sun.management.jmxremote",
+			"-Dcom.sun.management.jmxremote.port=9010",
+			"-Dcom.sun.management.jmxremote.local.only=false",
+			"-Dcom.sun.management.jmxremote.authenticate=false",
+			"-Dcom.sun.management.jmxremote.ssl=false"
+	]
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }

@@ -27,7 +27,7 @@ class DailyJobTest {
     JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
-    @Qualifier("finishChallengeAndDistributeRewardJob")
+    @Qualifier("dailySettlementJob")
     Job job;
 
     @Autowired
@@ -97,10 +97,10 @@ class DailyJobTest {
     }
 
     /**
-     * 챌린지를 DB에 주입한다. 챌린지의 속성은 다음과 같다.
-     * 99번 챌린지: 분배할 챌린지, 히스토리 주입 편의 상 기간 이틀로 가정
-     * 100번 챌린지: 아직 안 끝난 챌린지
-     * 101번 챌린지: 이미 끝난 챌린지, 중복 보상을 확인하는 목적
+     * 챌린지를 DB에 주입한다. 챌린지의 속성은 다음과 같다. </br>
+     * - 99번 챌린지: 분배할 챌린지, 히스토리 주입 편의 상 기간 이틀로 가정 </br>
+     * - 100번 챌린지: 아직 안 끝난 챌린지 </br>
+     * - 101번 챌린지: 이미 끝난 챌린지, 중복 보상을 확인하는 목적
      */
     private void insertChallenges() {
         jdbcTemplate.update(
@@ -111,10 +111,10 @@ class DailyJobTest {
     }
 
     /**
-     * 사용자의 포인트 지갑을 주입한다.
-     * 99번 사용자: 99번 챌린지의 유일한 달성자, 잔액 0
-     * 100번 사용자: 100번 챌린지 참가중
-     * 101번 사용자: 101번 챌린지의 달성자, 포인트 이미 수령 -> 잔액 3000
+     * 사용자의 포인트 지갑을 주입한다. </br>
+     * - 99번 사용자: 99번 챌린지의 유일한 달성자, 잔액 0 </br>
+     * - 100번 사용자: 100번 챌린지 참가중 </br>
+     * - 101번 사용자: 101번 챌린지의 달성자, 포인트 이미 수령 -> 잔액 3000
      */
     private void insertPointWallet() {
         jdbcTemplate.update(
@@ -125,10 +125,10 @@ class DailyJobTest {
     }
 
     /**
-     * 달성률 계산을 위해 히스토리를 주입한다.
-     * 99번 사용자 - 99번 챌린지 2번 인증
-     * 100번 사용자 - 100번 챌린지 1번 인증
-     * 101번 사용자 - 101번 챌린지 2번 인증
+     * 달성률 계산을 위해 히스토리를 주입한다. </br>
+     * - 99번 사용자 - 99번 챌린지 2번 인증 </br>
+     * - 100번 사용자 - 100번 챌린지 1번 인증 </br>
+     * - 101번 사용자 - 101번 챌린지 2번 인증
      */
     private void insertHistory() {
         jdbcTemplate.update(

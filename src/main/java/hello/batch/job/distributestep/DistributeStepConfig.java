@@ -2,8 +2,10 @@ package hello.batch.job.distributestep;
 
 import hello.batch.model.ChallengeResult;
 import hello.batch.model.Reward;
+import org.springframework.batch.core.ChunkListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
@@ -13,6 +15,7 @@ import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuild
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -27,22 +30,43 @@ public class DistributeStepConfig {
         PlatformTransactionManager transactionManager,
         ItemReader<ChallengeResult> challengeResultReader,
         ItemProcessor<ChallengeResult, Reward> calculateRewardProcessor,
-        ItemWriter<Reward> distributeRewardWriter
+        ItemWriter<Reward> distributeRewardWriter,
+        TaskExecutor taskExecutor
     ) {
-        return new StepBuilder("distributeChanllengeStep", jobRepository)
-            .<ChallengeResult, Reward>chunk(10, transactionManager)
+        return new StepBuilder("DistributeRewardStep", jobRepository)
+            .<ChallengeResult, Reward>chunk(1000, transactionManager)
             .reader(challengeResultReader)
             .processor(calculateRewardProcessor)
             .writer(distributeRewardWriter)
+            .taskExecutor(taskExecutor)
+            .listener(new ChunkListener() {
+                private long start;
+
+                @Override
+                public void beforeChunk(ChunkContext context) {
+                    start = System.currentTimeMillis();
+                }
+
+                @Override
+                public void afterChunk(ChunkContext context) {
+                    long duration = System.currentTimeMillis() - start;
+                    System.out.println("Chunk 처리 시간: " + duration + "ms");
+                }
+
+                @Override
+                public void afterChunkError(ChunkContext context) {
+                    System.out.println("Chunk 에러 발생");
+                }
+            })
             .build();
     }
 
     @Bean
     public ItemReader<ChallengeResult> challengeResultReader(DataSource dataSource) {
         return new JdbcPagingItemReaderBuilder<ChallengeResult>()
-            .name("challengeResultReader")
+            .name("ChallengeResultReader")
             .dataSource(dataSource)
-            .pageSize(100)
+            .pageSize(1000)
             .queryProvider(challengeResultQueryProvider(dataSource))
             .rowMapper(challengeResultRowMapper())
             .build();

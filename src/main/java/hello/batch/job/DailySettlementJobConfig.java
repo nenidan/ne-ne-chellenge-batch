@@ -9,13 +9,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class DailyJobConfig {
+public class DailySettlementJobConfig {
 
     @Bean
-    public Job finishChallengeAndDistributeRewardJob(JobRepository jobRepository,
+    public Job dailySettlementJob(JobRepository jobRepository,
         @Qualifier("finishChallengeStep") Step finishChallengeStep,
         @Qualifier("distributeRewardStep") Step distributeRewardStep) {
-        return new JobBuilder("finishChallengeAndDistributeRewardJob", jobRepository)
+        return new JobBuilder("dailySettlementJob", jobRepository)
             .start(finishChallengeStep)
             .next(distributeRewardStep)
             .build();

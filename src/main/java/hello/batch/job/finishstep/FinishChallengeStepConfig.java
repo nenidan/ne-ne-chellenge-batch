@@ -1,5 +1,6 @@
 package hello.batch.job.finishstep;
 
+import hello.batch.StepTimerListener;
 import hello.batch.model.Challenge;
 import hello.batch.model.ChallengeResult;
 import org.springframework.batch.core.Step;
@@ -15,8 +16,10 @@ import org.springframework.batch.item.database.support.SqlPagingQueryProviderFac
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -29,15 +32,27 @@ public class FinishChallengeStepConfig {
     public Step finishChallengeStep(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
         ItemReader<Challenge> expiredChallengeReader,
-        ItemProcessor<Challenge, ChallengeResult> finishedChallengeProcessor,
-        ItemWriter<ChallengeResult> finishedChallengeWriter
+        ItemProcessor<Challenge, ChallengeResult> expiredChallengeProcessor,
+        ItemWriter<ChallengeResult> expiredChallengeWriter
     ) {
-        return new StepBuilder("finishChallengeStep", jobRepository)
-            .<Challenge, ChallengeResult>chunk(100, transactionManager)
+        return new StepBuilder("FinishChallengeStep", jobRepository)
+            .<Challenge, ChallengeResult>chunk(1000, transactionManager)
             .reader(expiredChallengeReader)
-            .processor(finishedChallengeProcessor)
-            .writer(finishedChallengeWriter)
+            .processor(expiredChallengeProcessor)
+            .writer(expiredChallengeWriter)
+            .listener(new StepTimerListener())
+            .taskExecutor(threadPoolTaskExecutor())
             .build();
+    }
+
+    @Bean
+    TaskExecutor threadPoolTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.initialize();
+        return executor;
     }
 
     /**
@@ -46,13 +61,13 @@ public class FinishChallengeStepConfig {
      */
     @StepScope
     @Bean
-    public ItemReader<Challenge> finishedChallengeReader(DataSource dataSource,
+    public ItemReader<Challenge> expiredChallengeReader(DataSource dataSource,
         @Value("#{jobParameters['targetDate']}") String targetDateString
     ) {
         return new JdbcPagingItemReaderBuilder<Challenge>()
-            .name("finishedChallengeReader")
+            .name("ExpiredChallengeReader")
             .dataSource(dataSource)
-            .pageSize(100)
+            .pageSize(10000)
             .queryProvider(expiredChallengeQueryProvider(dataSource))
             .parameterValues(Map.of("targetDate", targetDateString))
             .rowMapper(challengeRowMapper())
@@ -85,7 +100,7 @@ public class FinishChallengeStepConfig {
     }
 
     @Bean
-    public ItemProcessor<Challenge, ChallengeResult> finishedChallengeProcessor(JdbcTemplate jdbcTemplate) {
+    public ItemProcessor<Challenge, ChallengeResult> expiredChallengeProcessor(JdbcTemplate jdbcTemplate) {
         return new ExpiredChallengeProcessor();
     }
 

@@ -28,12 +28,14 @@ public class CalculateRewardProcessor implements ItemProcessor<ChallengeResult, 
 
         Long challengeId = result.getChallengeId();
         List<Long> winners = getWinners(challengeId, result.getTotalDays());
+
         if (!winners.isEmpty()) {
             int reward = result.getTotalFee() / winners.size();
             for (Long winner : winners) {
                 userRewardMap.put(winner, reward);
             }
         }
+
         Map<Long, Long> userPointWallet = getUserPointWallet(winners);
 
         return new Reward(challengeId, userRewardMap, userPointWallet);
@@ -101,10 +103,12 @@ public class CalculateRewardProcessor implements ItemProcessor<ChallengeResult, 
             GROUP BY user_id
             """;
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, challengeId);
-        return rows.stream()
+        Map<Long, Integer> collect = rows.stream()
             .collect(Collectors.toMap(
                 row -> ((Number) row.get("user_id")).longValue(),
                 row -> ((Number) row.get("count")).intValue()
             ));
+
+        return collect;
     }
 }
