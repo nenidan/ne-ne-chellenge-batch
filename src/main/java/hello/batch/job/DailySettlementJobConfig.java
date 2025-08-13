@@ -14,9 +14,11 @@ public class DailySettlementJobConfig {
     @Bean
     public Job dailySettlementJob(JobRepository jobRepository,
         @Qualifier("finishChallengeStep") Step finishChallengeStep,
+        @Qualifier("calculateRewardStep") Step calculateRewardStep,
         @Qualifier("distributeRewardStep") Step distributeRewardStep) {
-        return new JobBuilder("dailySettlementJob", jobRepository)
+        return new JobBuilder("DailySettlementJob", jobRepository)
             .start(finishChallengeStep)
+            .next(calculateRewardStep)
             .next(distributeRewardStep)
             .build();
     }

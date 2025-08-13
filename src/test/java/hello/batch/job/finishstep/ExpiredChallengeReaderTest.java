@@ -1,6 +1,6 @@
 package hello.batch.job.finishstep;
 
-import hello.batch.model.Challenge;
+import hello.batch.dto.Challenge;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParameters;

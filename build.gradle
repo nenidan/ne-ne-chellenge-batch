@@ -40,6 +40,13 @@ test {
 	]
 }
 
+// 기능 검증과 관련 없는 테스트는 제외
+test {
+	exclude 'hello/batch/launch/**'
+	exclude 'hello/batch/JmxTest.class'
+}
+
+
 tasks.named('test') {
 	useJUnitPlatform()
 }

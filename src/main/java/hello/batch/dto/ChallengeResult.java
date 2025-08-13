@@ -1,4 +1,4 @@
-package hello.batch.model;
+package hello.batch.dto;
 
 public class ChallengeResult {
 

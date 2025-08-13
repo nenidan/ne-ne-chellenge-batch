@@ -1,7 +1,7 @@
-package hello.batch.job.distributestep;
+package hello.batch.job.calculaterewardstep;
 
-import hello.batch.model.ChallengeResult;
-import hello.batch.model.Reward;
+import hello.batch.dto.ChallengeResult;
+import hello.batch.dto.Reward;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -36,34 +36,7 @@ public class CalculateRewardProcessor implements ItemProcessor<ChallengeResult, 
             }
         }
 
-        Map<Long, Long> userPointWallet = getUserPointWallet(winners);
-
-        return new Reward(challengeId, userRewardMap, userPointWallet);
-    }
-
-    private Map<Long, Long> getUserPointWallet(List<Long> winners) {
-        if (winners.isEmpty()) return Map.of();
-
-        String inClause = winners.stream()
-            .map(id -> "?")
-            .collect(Collectors.joining(", ", "(", ")"));
-
-        String sql = """
-        SELECT user_id, id
-        FROM point_wallet
-        WHERE user_id IN %s AND deleted_at IS NULL
-        """.formatted(inClause);
-
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, winners.toArray());
-
-        Map<Long, Long> userPointWallet = new HashMap<>();
-        for (Map<String, Object> row : rows) {
-            Long userId = ((Number) row.get("user_id")).longValue();
-            Long walletId = ((Number) row.get("id")).longValue();
-            userPointWallet.put(userId, walletId);
-        }
-
-        return userPointWallet;
+        return new Reward(challengeId, userRewardMap);
     }
 
     private List<Long> getWinners(Long challengeId, Integer totalDays) {

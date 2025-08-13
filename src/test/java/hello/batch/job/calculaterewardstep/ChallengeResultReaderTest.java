@@ -1,6 +1,6 @@
-package hello.batch.job.distributestep;
+package hello.batch.job.calculaterewardstep;
 
-import hello.batch.model.ChallengeResult;
+import hello.batch.dto.ChallengeResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.item.ItemReader;
@@ -29,9 +29,9 @@ public class ChallengeResultReaderTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate.update(
-            "INSERT INTO tmp_finished_challenge(id, challenge_id, total_fee, total_days) VALUES (1, 1, 1000, 1)");
+            "INSERT INTO tmp_finished_challenge(challenge_id, total_fee, total_days) VALUES (1, 1000, 1)");
         jdbcTemplate.update(
-            "INSERT INTO tmp_finished_challenge(id, challenge_id, total_fee, total_days) VALUES (2, 1, 2000, 2)");
+            "INSERT INTO tmp_finished_challenge(challenge_id, total_fee, total_days) VALUES (2, 2000, 2)");
     }
 
     @Test
@@ -47,6 +47,6 @@ public class ChallengeResultReaderTest {
 
         // then
         assertThat(results).hasSize(2);
-        assertThat(results).allMatch(r -> r.getChallengeId() == 1);
+        assertThat(results).anyMatch(r -> r.getChallengeId() == 1);
     }
 }

@@ -1,7 +1,7 @@
-package hello.batch.job.distributestep;
+package hello.batch.job.calculaterewardstep;
 
-import hello.batch.model.ChallengeResult;
-import hello.batch.model.Reward;
+import hello.batch.dto.ChallengeResult;
+import hello.batch.dto.Reward;
 import org.springframework.batch.core.ChunkListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
@@ -18,27 +18,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
 @Configuration
-public class DistributeStepConfig {
+public class CalculateRewardStepConfig {
 
     @Bean
-    public Step distributeRewardStep(JobRepository jobRepository,
+    public Step calculateRewardStep(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
         ItemReader<ChallengeResult> challengeResultReader,
         ItemProcessor<ChallengeResult, Reward> calculateRewardProcessor,
-        ItemWriter<Reward> distributeRewardWriter,
-        TaskExecutor taskExecutor
+        ItemWriter<Reward> rewardInfoWriter
     ) {
-        return new StepBuilder("DistributeRewardStep", jobRepository)
+        return new StepBuilder("CalculateRewardStep", jobRepository)
             .<ChallengeResult, Reward>chunk(1000, transactionManager)
             .reader(challengeResultReader)
             .processor(calculateRewardProcessor)
-            .writer(distributeRewardWriter)
-            .taskExecutor(taskExecutor)
+            .writer(rewardInfoWriter)
+            .taskExecutor(threadPoolTaskExecutor())
             .listener(new ChunkListener() {
                 private long start;
 
@@ -61,6 +61,15 @@ public class DistributeStepConfig {
             .build();
     }
 
+    private TaskExecutor threadPoolTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.initialize();
+        return executor;
+    }
+
     @Bean
     public ItemReader<ChallengeResult> challengeResultReader(DataSource dataSource) {
         return new JdbcPagingItemReaderBuilder<ChallengeResult>()
@@ -76,9 +85,9 @@ public class DistributeStepConfig {
     public PagingQueryProvider challengeResultQueryProvider(DataSource dataSource) {
         SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
         factoryBean.setDataSource(dataSource);
-        factoryBean.setSelectClause("SELECT id, challenge_id, total_fee, total_days");
+        factoryBean.setSelectClause("SELECT challenge_id, total_fee, total_days");
         factoryBean.setFromClause("FROM tmp_finished_challenge");
-        factoryBean.setSortKey("id");
+        factoryBean.setSortKey("challenge_id");
 
         try {
             return factoryBean.getObject();
@@ -101,7 +110,7 @@ public class DistributeStepConfig {
     }
 
     @Bean
-    public ItemWriter<Reward> distributeRewardWriter(JdbcTemplate jdbcTemplate) {
-        return new DistributeRewardWriter(jdbcTemplate);
+    public ItemWriter<Reward> rewardInfoWriter(JdbcTemplate jdbcTemplate) {
+        return new RewardInfoWriter(jdbcTemplate);
     }
 }

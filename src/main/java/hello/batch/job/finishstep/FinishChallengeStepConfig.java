@@ -1,8 +1,8 @@
 package hello.batch.job.finishstep;
 
 import hello.batch.StepTimerListener;
-import hello.batch.model.Challenge;
-import hello.batch.model.ChallengeResult;
+import hello.batch.dto.Challenge;
+import hello.batch.dto.ChallengeResult;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
@@ -45,8 +45,7 @@ public class FinishChallengeStepConfig {
             .build();
     }
 
-    @Bean
-    TaskExecutor threadPoolTaskExecutor() {
+    private TaskExecutor threadPoolTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(4);
         executor.setMaxPoolSize(10);
@@ -57,7 +56,7 @@ public class FinishChallengeStepConfig {
 
     /**
      * @param targetDateString JobParameter로 등록된 처리하고자 하는 날짜
-     *                         FinishedChallengeReader는 due_at이 targetDate이고, status가 ONGOING인 row를 읽는다.
+     * FinishedChallengeReader는 due_at이 targetDate이고, status가 ONGOING인 row를 읽는다.
      */
     @StepScope
     @Bean

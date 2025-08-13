@@ -3,6 +3,7 @@ drop table if exists history;
 drop table if exists point_transaction;
 drop table if exists point_wallet;
 drop table if exists tmp_finished_challenge;
+drop table if exists tmp_reward_info;
 
 create table challenge
 (
@@ -70,9 +71,15 @@ create table point_transaction
 
 create table tmp_finished_challenge
 (
-    id           bigint auto_increment
-        primary key,
-    challenge_id bigint not null,
+    challenge_id bigint not null primary key,
     total_fee    int    not null,
     total_days   int    not null
-)
+);
+
+create table tmp_reward_info
+(
+    user_id      int not null comment '사용자 id',
+    challenge_id int not null comment '달성한 챌린지 id',
+    amount       int null comment '보상 금액',
+    primary key (user_id, challenge_id)
+);

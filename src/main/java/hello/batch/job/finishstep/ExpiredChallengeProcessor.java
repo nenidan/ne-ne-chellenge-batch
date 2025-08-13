@@ -1,7 +1,7 @@
 package hello.batch.job.finishstep;
 
-import hello.batch.model.Challenge;
-import hello.batch.model.ChallengeResult;
+import hello.batch.dto.Challenge;
+import hello.batch.dto.ChallengeResult;
 import org.springframework.batch.item.ItemProcessor;
 
 import java.time.temporal.ChronoUnit;

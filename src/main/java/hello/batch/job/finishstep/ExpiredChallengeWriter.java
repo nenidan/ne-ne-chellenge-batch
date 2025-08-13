@@ -1,6 +1,6 @@
 package hello.batch.job.finishstep;
 
-import hello.batch.model.ChallengeResult;
+import hello.batch.dto.ChallengeResult;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
