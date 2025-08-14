@@ -1,11 +1,9 @@
 package hello.batch.job.distributerewardstep;
 
 import hello.batch.dto.RewardInfo;
-import org.springframework.batch.core.ChunkListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
@@ -27,16 +25,31 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
-@Configuration
-public class DistributeRewardStepConfig {
-
+// 현재 싱글스레드와 파티션된 Step의 성능 차이가 없으므로 참고용으로 남겨만 둔다.
+// @Configuration
+public class PartitionedDistributeRewardStepConfig {
+    // Manager Step
     @Bean
     public Step distributeRewardStep(JobRepository jobRepository,
+        PointWalletPartitioner partitioner,
+        Step distributeRewardWorkerStep
+    ) {
+        return new StepBuilder("DistributeRewardStep", jobRepository)
+            .partitioner("DistributeRewardWorkerStep", partitioner)
+            .step(distributeRewardWorkerStep)
+            .gridSize(4)
+            .taskExecutor(threadPoolTaskExecutor())
+            .build();
+    }
+
+    // Worker Step
+    @Bean
+    public Step distributeRewardWorkerStep(JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
         JdbcTemplate jdbcTemplate,
         ItemReader<RewardInfo> rewardInfoReader
     ) {
-        return new StepBuilder("DistributeRewardStep", jobRepository)
+        return new StepBuilder("DistributeRewardWorkerStep", jobRepository)
             .<RewardInfo, RewardInfo>chunk(1000, transactionManager)
             .reader(rewardInfoReader)
             .processor(noOpRewardInfoProcessor())
@@ -44,13 +57,30 @@ public class DistributeRewardStepConfig {
             .build();
     }
 
+    private TaskExecutor threadPoolTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(4);
+        executor.setQueueCapacity(100);
+        executor.initialize();
+        return executor;
+    }
+
     @Bean
-    public ItemReader<RewardInfo> rewardInfoReader(DataSource dataSource) {
+    @StepScope
+    public ItemReader<RewardInfo> rewardInfoReader(DataSource dataSource,
+        @Value("#{stepExecutionContext['minUserId']}") Long minUserId,
+        @Value("#{stepExecutionContext['maxUserId']}") Long maxUserId) {
+        Map<String, Object> parameterValues = new HashMap<>();
+        parameterValues.put("minUserId", minUserId);
+        parameterValues.put("maxUserId", maxUserId);
+
         return new JdbcPagingItemReaderBuilder<RewardInfo>()
             .name("RewardInfoReader")
             .dataSource(dataSource)
             .pageSize(1000)
             .queryProvider(rewardInfoQueryProvider(dataSource))
+            .parameterValues(parameterValues)
             .rowMapper(resultInfoRowMapper())
             .build();
     }
@@ -61,6 +91,7 @@ public class DistributeRewardStepConfig {
         factoryBean.setDataSource(dataSource);
         factoryBean.setSelectClause("SELECT challenge_id, user_id, amount");
         factoryBean.setFromClause("FROM tmp_reward_info");
+        factoryBean.setWhereClause("user_id BETWEEN :minUserId AND :maxUserId");
         factoryBean.setSortKeys(Map.of(
             "challenge_id", Order.ASCENDING,
             "user_id", Order.ASCENDING

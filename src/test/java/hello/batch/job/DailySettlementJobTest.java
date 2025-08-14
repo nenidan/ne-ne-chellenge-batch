@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @SpringBatchTest
 @ActiveProfiles("test")
-class DailyJobTest {
+class DailySettlementJobTest {
 
     @Autowired
     JobRepositoryTestUtils jobRepositoryTestUtils;
@@ -83,17 +83,21 @@ class DailyJobTest {
         assertThat(user100Point).isEqualTo(0);
         assertThat(user101Point).isEqualTo(3000);
 
-        Integer transactionCount = jdbcTemplate.queryForObject(
+        Integer pointTransactionCount = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM point_transaction WHERE point_wallet_id = ?",
             Integer.class,
             99
         );
-        assertThat(transactionCount).isEqualTo(1);
+        assertThat(pointTransactionCount).isEqualTo(1);
 
-        Integer tempTableRow = jdbcTemplate.queryForObject("SELECT count(*) FROM tmp_finished_challenge",
+        Integer tempFinishedChallengeCount = jdbcTemplate.queryForObject("SELECT count(*) FROM tmp_finished_challenge",
             Integer.class
         );
-        assertThat(tempTableRow).isEqualTo(0);
+        assertThat(tempFinishedChallengeCount).isEqualTo(0);
+        Integer tempRewardInfoCount = jdbcTemplate.queryForObject("SELECT count(*) FROM tmp_reward_info",
+            Integer.class
+        );
+        assertThat(tempRewardInfoCount).isEqualTo(0);
     }
 
     /**

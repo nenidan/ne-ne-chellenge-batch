@@ -51,7 +51,7 @@ class RewardDistributeWriterTest {
         writer.write(chunk);
 
         // then
-        Integer tmpTableCount = jdbcTemplate.queryForObject("SELECT count(*) FROM tmp_reward_info", Integer.class);
+        Integer tmpTableCount = jdbcTemplate.queryForObject("SELECT count(*) FROM tmp_reward_info WHERE is_processed = 0", Integer.class);
         assertThat(tmpTableCount).isEqualTo(0);
 
         Integer user1Balance = jdbcTemplate.queryForObject("SELECT balance FROM point_wallet WHERE user_id = 1", Integer.class);

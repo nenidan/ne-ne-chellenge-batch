@@ -68,18 +68,20 @@ create table point_transaction
         foreign key (point_wallet_id) references point_wallet (id)
 );
 
-
 create table tmp_finished_challenge
 (
-    challenge_id bigint not null primary key,
-    total_fee    int    not null,
-    total_days   int    not null
+    challenge_id bigint            not null
+        primary key,
+    total_fee    int               not null,
+    total_days   int               not null,
+    is_processed tinyint default 0 not null
 );
 
 create table tmp_reward_info
 (
-    user_id      int not null comment '사용자 id',
-    challenge_id int not null comment '달성한 챌린지 id',
-    amount       int null comment '보상 금액',
+    user_id      int               not null comment '사용자 id',
+    challenge_id int               not null comment '달성한 챌린지 id',
+    amount       int               null comment '보상 금액',
+    is_processed tinyint default 0 not null,
     primary key (user_id, challenge_id)
 );

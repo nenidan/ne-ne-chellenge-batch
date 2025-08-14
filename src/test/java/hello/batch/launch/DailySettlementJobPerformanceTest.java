@@ -24,7 +24,7 @@ public class DailySettlementJobPerformanceTest {
     @Autowired
     JobRepositoryTestUtils jobRepositoryTestUtils;
 
-//    @BeforeEach
+    @BeforeEach
     void before() {
         jobRepositoryTestUtils.removeJobExecutions();
     }
@@ -43,6 +43,6 @@ public class DailySettlementJobPerformanceTest {
         long start = System.currentTimeMillis();
         jobLauncherTestUtils.launchJob(jobParameters);
         long end = System.currentTimeMillis();
-        System.out.println(end - start + " ms");
+        System.out.println("Job took " + (end - start) + " ms");
     }
 }

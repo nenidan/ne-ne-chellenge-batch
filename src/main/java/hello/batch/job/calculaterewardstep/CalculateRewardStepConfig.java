@@ -39,25 +39,6 @@ public class CalculateRewardStepConfig {
             .processor(calculateRewardProcessor)
             .writer(rewardInfoWriter)
             .taskExecutor(threadPoolTaskExecutor())
-            .listener(new ChunkListener() {
-                private long start;
-
-                @Override
-                public void beforeChunk(ChunkContext context) {
-                    start = System.currentTimeMillis();
-                }
-
-                @Override
-                public void afterChunk(ChunkContext context) {
-                    long duration = System.currentTimeMillis() - start;
-                    System.out.println("Chunk 처리 시간: " + duration + "ms");
-                }
-
-                @Override
-                public void afterChunkError(ChunkContext context) {
-                    System.out.println("Chunk 에러 발생");
-                }
-            })
             .build();
     }
 

@@ -23,7 +23,7 @@ public class RewardInfoWriter implements ItemWriter<Reward> {
 
     /**
      * 각 사용자가 어떤 챌린지에 참여해서 얼마만큼의 보상을 얻었는지 tmp_reward_info 테이블에 (user_id, challenge_id, amount)를 저장하고 </br>
-     * tmp_finished_challenge 테이블에서 해당하는 row를 지운다.
+     * tmp_finished_challenge 테이블에서 해당하는 row의 is_processed를 1(true)로 저장한다.
      * @param chunk of items to be written. Must not be {@code null}.
      * @throws Exception
      */
@@ -35,7 +35,7 @@ public class RewardInfoWriter implements ItemWriter<Reward> {
             .map(Reward::getChallengeId)
             .toList();
 
-        clearTempTableWithIn(challengeIdsToDelete);
+        updateTempTableWithIn(challengeIdsToDelete);
     }
 
     private void writeRewardInfo(Reward reward) {
@@ -60,11 +60,11 @@ public class RewardInfoWriter implements ItemWriter<Reward> {
         });
     }
 
-    private void clearTempTableWithIn(List<Long> challengeIds) {
+    private void updateTempTableWithIn(List<Long> challengeIds) {
         String placeholders = challengeIds.stream()
             .map(id -> "?")
             .collect(Collectors.joining(", "));
-        String sql = "DELETE FROM tmp_finished_challenge WHERE challenge_id IN (" + placeholders + ")";
+        String sql = "UPDATE tmp_finished_challenge SET is_processed = 1 WHERE challenge_id IN (" + placeholders + ")";
         jdbcTemplate.update(sql, challengeIds.toArray());
     }
 }

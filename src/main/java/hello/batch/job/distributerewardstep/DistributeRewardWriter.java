@@ -25,6 +25,7 @@ public class DistributeRewardWriter implements ItemWriter<RewardInfo> {
     /**
      * (user_id, challenge_id, amount)를 읽어와
      * point_transaction 기록 생성, point_wallet에 amount를 증가시킨다.
+     * tmp_reward_info의 is_processed를 true로 설정한다.
      * @param chunk of items to be written. Must not be {@code null}.
      * @throws Exception
      */
@@ -32,18 +33,19 @@ public class DistributeRewardWriter implements ItemWriter<RewardInfo> {
     public void write(Chunk<? extends RewardInfo> chunk) {
         List<? extends RewardInfo> rewardInfos = chunk.getItems();
 
-        writePointTransaction(rewardInfos);
+        updateTmpRewardInfo(rewardInfos);
 
-        clearTmpRewardInfo(rewardInfos);
+        List<Long> userIdList = rewardInfos.stream().map(RewardInfo::getUserId).toList();
+        Map<Long, Long> userPointWalletMap = getUserPointWallet(userIdList); // (user_id, point_wallet_id)
 
-        addPoint(rewardInfos);
+        writePointTransaction(rewardInfos, userPointWalletMap);
+
+        addPoint(rewardInfos, userPointWalletMap);
     }
 
-    private void writePointTransaction(List<? extends RewardInfo> rewardInfoList) {
-
+    private void writePointTransaction(List<? extends RewardInfo> rewardInfoList, Map<Long, Long> userPointWalletMap) {
         // 사용자의 point_wallet_id 를 조회한다.
         List<Long> userIdList = rewardInfoList.stream().map(RewardInfo::getUserId).toList();
-        Map<Long, Long> userPointWalletMap = getUserPointWallet(userIdList); // (user_id, point_wallet_id)
 
         LocalDateTime now = LocalDateTime.now();
         Timestamp nowTimestamp = Timestamp.valueOf(now);
@@ -71,12 +73,12 @@ public class DistributeRewardWriter implements ItemWriter<RewardInfo> {
         );
     }
 
-    private void clearTmpRewardInfo(List<? extends RewardInfo> rewardInfos) {
+    private void updateTmpRewardInfo(List<? extends RewardInfo> rewardInfos) {
         String placeholders = rewardInfos.stream()
             .map(r -> "(?, ?)")
             .collect(Collectors.joining(", "));
 
-        String sql = "DELETE FROM tmp_reward_info WHERE (user_id, challenge_id) IN (" + placeholders + ")";
+        String sql = "UPDATE tmp_reward_info SET is_processed = 1 WHERE (user_id, challenge_id) IN (" + placeholders + ")";
 
         // 파라미터 배열을 (userId1, challengeId1, userId2, challengeId2, ...) 형태로 만들기
         Object[] params = rewardInfos.stream()
@@ -86,16 +88,19 @@ public class DistributeRewardWriter implements ItemWriter<RewardInfo> {
         jdbcTemplate.update(sql, params);
     }
 
-    private void addPoint(List<? extends RewardInfo> rewardInfos) {
-
-        Map<Long, Integer> userRewards = new HashMap<>();
+    private void addPoint(List<? extends RewardInfo> rewardInfos, Map<Long, Long> userPointWalletMap) {
+        Map<Long, Integer> pointWalletRewards = new HashMap<>();
         for (RewardInfo r : rewardInfos) {
-            userRewards.merge(r.getUserId(), r.getAmount(), Integer::sum);
+            Long pointWalletId = userPointWalletMap.get(r.getUserId());
+            pointWalletRewards.merge(pointWalletId, r.getAmount(), Integer::sum);
         }
 
-        List<Map.Entry<Long, Integer>> entries = new ArrayList<>(userRewards.entrySet());
+        List<Map.Entry<Long, Integer>> entries = pointWalletRewards.entrySet()
+            .stream()
+            .sorted(Map.Entry.comparingByKey())
+            .toList();
 
-        String sql = "UPDATE point_wallet SET balance = balance + ? WHERE user_id = ?";
+        String sql = "UPDATE point_wallet SET balance = balance + ? WHERE id = ?";
 
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override

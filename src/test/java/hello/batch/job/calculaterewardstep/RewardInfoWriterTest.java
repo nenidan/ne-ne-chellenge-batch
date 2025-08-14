@@ -49,7 +49,7 @@ class RewardInfoWriterTest {
         Integer amount = jdbcTemplate.queryForObject("SELECT amount FROM tmp_reward_info WHERE user_id = 99 AND challenge_id = 99", Integer.class);
         assertThat(amount).isEqualTo(20000);
 
-        Integer tempTableRow = jdbcTemplate.queryForObject("select count(*) from tmp_finished_challenge",
+        Integer tempTableRow = jdbcTemplate.queryForObject("select count(*) from tmp_finished_challenge WHERE is_processed = 0",
             Integer.class
         );
         assertThat(tempTableRow).isEqualTo(0);
