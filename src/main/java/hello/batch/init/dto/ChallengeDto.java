@@ -1,4 +1,4 @@
-package hello.batch.job.init.dto;
+package hello.batch.dailysettlementjob.init.dto;
 
 import java.time.LocalDate;
 

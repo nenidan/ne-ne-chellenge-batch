@@ -6,7 +6,8 @@ spring:
     jdbc:
       initialize-schema: always
     job:
-      enabled: false
+      enabled: true
+      name: ${job.name:none}
 
   datasource:
 #    url: ${DB_URL}
@@ -14,8 +15,7 @@ spring:
 #    password: ${DB_PASSWORD}
 #    driver-class-name: com.mysql.cj.jdbc.Driver
 
-    url: jdbc:mysql://localhost:3306/million_performance?rewriteBatchedStatements=true
-#    url: jdbc:mysql://localhost:3306/ten_thousand_challenges?rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost:3306/<your_schema?rewriteBatchedStatements=true>
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver

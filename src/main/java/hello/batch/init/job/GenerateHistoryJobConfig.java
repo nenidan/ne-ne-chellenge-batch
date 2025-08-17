@@ -1,13 +1,10 @@
 package hello.batch.init.job;
 
-import hello.batch.StepTimerListener;
-import org.springframework.batch.core.ChunkListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -31,7 +28,7 @@ import java.util.stream.Collectors;
 /**
  * 오늘 처리할 챌린지만 담긴 테이블을 읽어와서 히스토리를 생성한다.
  */
-@Configuration
+//@Configuration
 public class GenerateHistoryJobConfig {
 
     private final JdbcTemplate jdbcTemplate;
