@@ -1,7 +1,6 @@
 package hello.batch.dailysettlementjob.tasklet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import hello.batch.dailysettlementjob.slack.SlackService;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -12,12 +11,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClearTmpTableTasklet implements Tasklet {
 
-    private static final Logger log = LoggerFactory.getLogger(ClearTmpTableTasklet.class);
-
     private final JdbcTemplate jdbcTemplate;
+    private final SlackService slackService;
 
-    public ClearTmpTableTasklet(JdbcTemplate jdbcTemplate) {
+    public ClearTmpTableTasklet(JdbcTemplate jdbcTemplate, SlackService slackService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.slackService = slackService;
     }
 
     @Override
@@ -29,14 +28,14 @@ public class ClearTmpTableTasklet implements Tasklet {
             jdbcTemplate.update("TRUNCATE TABLE tmp_finished_challenge");
         } else {
             jdbcTemplate.update("DELETE FROM tmp_finished_challenge WHERE is_processed = 1");
-            log.error("There are {} unprocessed challenges in tmp_finished_challenge", tmpFinishedChallengeRemainingCount);
+            slackService.sendMessage("There are " + tmpFinishedChallengeRemainingCount + " unprocessed challenges in tmp_finished_challenge");
         }
 
         if (tmpRewardInfoRemainingCount == 0) {
             jdbcTemplate.update("TRUNCATE TABLE tmp_reward_info");
         } else {
             jdbcTemplate.update("DELETE FROM tmp_reward_info WHERE is_processed = 1");
-            log.error("There are {} unprocessed reward in tmp_reward_info", tmpRewardInfoRemainingCount);
+            slackService.sendMessage("There are " + tmpRewardInfoRemainingCount + " unprocessed reward in tmp_reward_info");
         }
 
         return RepeatStatus.FINISHED;

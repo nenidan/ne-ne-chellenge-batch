@@ -8,4 +8,10 @@ spring:
   batch:
     jdbc:
       initialize-schema: embedded
+    job:
+      enabled: false
 
+
+webhook:
+  slack:
+    url: https://fake-webhook-url
