@@ -1,5 +1,7 @@
 package hello.batch.admin.job;
 
+import hello.batch.admin.model.dto.type.DomainType;
+import hello.batch.admin.repository.StatisticTransactionRepository;
 import hello.batch.admin.repository.StatisticsRedisRepository;
 import hello.batch.admin.service.StatisticsCalService;
 import lombok.RequiredArgsConstructor;
@@ -14,31 +16,30 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class StatisticsScheduler {
 
-    private final StatisticsCalService statisticsCalService;
-    private final StatisticsRedisRepository redisRepository;
+    private final StatisticsCalService calc;
+    private final StatisticStore store;
+    private final StatsPayloadMapper mapper;
 
     @Scheduled(cron = "0 0 1 1 * *") // 매월 1일 새벽 1시
     public void runMonthlyStatisticsUpdate() {
         LocalDateTime now = LocalDateTime.now();
-        YearMonth targetMonth = YearMonth.from(now);
+        YearMonth ym = YearMonth.from(now);
 
-        saveIfAbsent("challenge", targetMonth, () -> statisticsCalService.getChallengeStatistics(now));
-        saveIfAbsent("payment", targetMonth, () -> statisticsCalService.getPaymentStatistics(now));
-        saveIfAbsent("point", targetMonth, () -> statisticsCalService.getPointStatistics(now));
-        saveIfAbsent("user", targetMonth, () -> statisticsCalService.getUserStatistics(now));
+        try {
+            store.upsert(DomainType.CHALLENGE, ym, mapper.toPayload(calc.getChallengeStatistics(now)));
+        } catch (Exception e) { /* log.warn("challenge 실패", e); */ }
+
+        try {
+            store.upsert(DomainType.PAYMENT, ym, mapper.toPayload(calc.getPaymentStatistics(now)));
+        } catch (Exception e) { /* log.warn("payment 실패", e); */ }
+
+        try {
+            store.upsert(DomainType.POINT, ym, mapper.toPayload(calc.getPointStatistics(now)));
+        } catch (Exception e) { /* log.warn("point 실패", e); */ }
+
+        try {
+            store.upsert(DomainType.USER, ym, mapper.toPayload(calc.getUserStatistics(now)));
+        } catch (Exception e) { /* log.warn("user 실패", e); */ }
     }
 
-    private <T> void saveIfAbsent(String type, YearMonth month, Supplier<T> supplier) {
-        String key = type + ":" + month;
-        String redisKey = "statistics:" + key;
-
-        // 이미 값이 있는 경우 스킵
-        if (redisRepository.exists(redisKey)) {
-            return;
-        }
-
-        // 값 계산 후 저장
-        T value = supplier.get();
-        redisRepository.save(key, value);
-    }
 }

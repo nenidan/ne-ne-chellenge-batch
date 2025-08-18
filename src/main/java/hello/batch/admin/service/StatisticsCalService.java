@@ -9,6 +9,7 @@ import hello.batch.admin.model.dto.PaymentStatisticsResponse;
 import hello.batch.admin.model.dto.PointStatisticsResponse;
 import hello.batch.admin.model.dto.UserStatisticsResponse;
 import hello.batch.admin.model.dto.outer.*;
+import hello.batch.admin.model.dto.type.ChallengeStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -51,7 +53,8 @@ public class StatisticsCalService {
 
         // 챌린지 참여율 (시작된 챌린지 수 / 전체 챌린지 수)
         long startedCount = challengeList.stream()
-                .filter(c -> c.getStartAt() != null)
+                .filter(c -> c.getStatus() != null)
+                .filter(c -> EnumSet.of(ChallengeStatus.ONGOING, ChallengeStatus.FINISHED).contains(c.getStatus()))
                 .count();
 
         double participationRate = challengeList.isEmpty() ? 0.0 :
