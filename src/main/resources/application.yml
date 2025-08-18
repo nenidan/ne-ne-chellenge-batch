@@ -5,9 +5,20 @@ spring:
   batch:
     jdbc:
       initialize-schema: always
+    job:
+      enabled: true
+      name: ${job.name:none}
 
   datasource:
-    url: jdbc:mysql://localhost:3306/test
+#    url: ${DB_URL}
+#    username: ${DB_USERNAME}
+#    password: ${DB_PASSWORD}
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+
+    url: jdbc:mysql://localhost:3306/<your_schema>?rewriteBatchedStatements=true>
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+    hikari:
+      register-mbeans: true
