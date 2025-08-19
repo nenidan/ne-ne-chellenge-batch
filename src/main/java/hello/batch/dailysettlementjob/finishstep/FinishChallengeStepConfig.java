@@ -80,7 +80,7 @@ public class FinishChallengeStepConfig {
         factoryBean.setDataSource(dataSource);
         factoryBean.setSelectClause("SELECT id, status, total_fee, start_at, due_at");
         factoryBean.setFromClause("FROM challenge");
-        factoryBean.setWhereClause("WHERE status = 'ONGOING' AND due_at = :targetDate");
+        factoryBean.setWhereClause("WHERE status <> 'FINISHED' AND due_at = :targetDate");
         factoryBean.setSortKey("id");
 
         try {
