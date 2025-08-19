@@ -7,7 +7,15 @@ spring:
       initialize-schema: always
 
   datasource:
-    url: jdbc:mysql://localhost:3306/test
+    url: jdbc:mysql://localhost:3306/final_db
     username: root
-    password: root
+    password: tmvkfmxk2419@
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:127.0.0.1}
+      port: ${SPRING_REDIS_PORT:6379}
+
+external:
+  base-url: http://127.0.0.1:8080
